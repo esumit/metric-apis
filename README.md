@@ -1,5 +1,5 @@
 #### Metric APIs
-Metric logging and reporting service that sums metrics by time window for 
+A conceptual metric logging and reporting service that sums metrics by time window for 
 the most recent collection time.  
 
 #### Demo Recording
@@ -8,45 +8,48 @@ https://tinyurl.com/metric-apis
 
 #### How conceptually it works ?
 
-This conceptual metric apis have implementation of two metric apis:
+This  metric apis service have implementation of two metric endpoints:
 
-On post request, its get an integer metric value for a specified metric key e.g. active_visitors.
-It gets the metric data, prepare a data model as metric data (CreatedAt, Key, Value), 
-provide it an Id and store in metric list data structure. 
+###### 1. post metric data for a metric key e.g. active_visitors
 
-On every insert it checks the configured COLLECTION_TIMEOUT value. It traverse
-all list's and check CreatedAt time should be in between current_time 
-and (current_time - COLLECTION_TIMEOUT), means most recent COLLECTION_TIMEOUT
-as time window. If list's elements not matches to time window then it removes it
-from the list. 
+On post request, it post an integer metric value for a specified metric key e.g. active_visitors.
+It prepare a data model as metric data (CreatedAt, Key, Value), provide it an Id and store 
+in metric list data structure. 
+
+On every insert, it traverse list's elements and check each element's CreatedAt time should be 
+in between current_time and (current_time - COLLECTION_TIMEOUT), means most recent
+COLLECTION_TIMEOUT as time window. 
+
+If list's elements CreatedAt time not matches to time window then remove it from the list. 
 
 on success, it returns the id of created metric-data in the list. 
 
-
 ````
-Request: post metric data for key - active_visitors
 POST localhost:9000/metrics/active_visitors
 Response:
 {
     "value": 20
 }
 ````
+It uses sync.mutex and apply lock on every insert and unlock it after.
 
 ![Screenshot Request: post metric data for key - active_visitors ](/images/Metric-POST-ByKey-2021-07-15.png)
 
 
-On get request, its get sum of metric values for a specified metric key e.g. active_visitors.
+###### 2. get metric data for a metric key e.g. active_visitors
 
-On every get it checks the configured COLLECTION_TIMEOUT value. It traverse
-all list's data and check its CreatedAt time should be in between current_time 
-and (current_time - COLLECTION_TIMEOUT), means most recent COLLECTION_TIMEOUT
-time window.
+On get request, its get sum of metric values for a specified metric key e.g. active_visitors, and 
+that is based on the configured time window.
 
-It picks the list elements which matches to the time window, it the calculate sum of its metric data Values, count number of metrics,
+On every get, it checks the configured COLLECTION_TIMEOUT value as time window. It traverse
+all list's elements, and check each element's CreatedAt time should be in between current_time 
+and (current_time - COLLECTION_TIMEOUT), means most recent COLLECTION_TIMEOUT time window.
+
+It picks the list elements which matches to the time window, it then calculate sum of its metric data Values, count of metrics,
 collection start time, collection end time and return as json.
-If list's elements not matches to time window then it removes it from the list. 
+If list's elements CreatedAt time not matches to time window then remove it from the list. 
 
-It uses sync.mutex and apply lock on every insert/get and unlock it after.
+It uses sync.mutex and apply lock on every get and unlock it after.
 
 ````
 Request : get metric data for key - active_visitors
@@ -68,7 +71,46 @@ Refer start_time and end_time :
 ![Screenshot Request: get metric data for key - active_visitors ](/images/Metric-GET-ByKey-2021-07-15.png)
 
 
+###### Code Structure
 
+````
+➜  metric-apis git:(main) tree
+.
+├── Dockerfile
+├── Makefile
+├── README.md
+├── dist
+├── docker-compose.yml
+├── go.mod
+├── go.sum
+├── images
+│   ├── Metric-GET-ByKey-2021-07-15.png
+│   └── Metric-POST-ByKey-2021-07-15.png
+├── main.go
+├── metric_benchmark.sh
+├── metric_get.sh
+├── metric_post.sh
+├── pkg
+│   ├── config
+│   │   └── type.go
+│   ├── data
+│   │   ├── metric-list.go
+│   │   └── type.go
+│   ├── httprqrs
+│   │   └── not-found.go
+│   ├── metric
+│   │   ├── data_manager.go
+│   │   ├── rq_handler.go
+│   │   └── types.go
+│   ├── mw
+│   │   └── handler.go
+│   └── third-party
+│       └── negroni-logrus
+│           ├── LICENSE
+│           └── middleware.go
+└── scripts
+
+````
 
 ### How to
 
@@ -106,7 +148,7 @@ Refer demo video
 
 #### How To Test 
 
-###### Time Window Test
+###### Time Window test
 
 Run: ./metric_post.sh 
 
@@ -117,7 +159,7 @@ metric_get.sh calling get metric request in every 3 seconds.
 
 Observe:  metric_count value in metric_get.sh output :
 
-- It increases based on the configured COLLECTION_TIMEOUT e.g. if its configured 
+- It increases based on the configured COLLECTION_TIMEOUT e.g. if configured 
   as 30 seconds then metric_count value will be shown 10 as maximum 
  
 Stop: metric_post.sh 
