@@ -4,7 +4,7 @@ the most recent collection time.
 
 #### Demo Recording
 
-https://tinyurl.com/trace-fruits-demo 
+https://tinyurl.com/metric-apis 
 
 #### How conceptually it works ?
 
@@ -164,17 +164,31 @@ Its just a short demo, many further possibilities are with this :
 
 ###### go, docker, mac os - versions  
 ````
-➜  metric-apis git:(main) ✗ go version
-go version go1.16.5 darwin/amd64
-➜  metric-apis git:(main) ✗ 
+➜  ~ git version
+git version 2.13.1
 
-➜  metric-apis git:(main) ✗ docker --version
+➜  ~ docker --version
 Docker version 19.03.8, build afacb8b
-➜  metric-apis git:(main) ✗ 
 
-➜  metric-apis git:(main) ✗ uname -a
+➜  ~ make --version 
+GNU Make 3.81
+Copyright (C) 2006  Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
+This program built for i386-apple-darwin11.3.0
+
+➜  ~ go version 
+go version go1.16.5 darwin/amd64
+
+➜  ~ uname -a 
 Darwin Newyork.local 20.5.0 Darwin Kernel Version 20.5.0: Sat May  8 05:10:33 PDT 2021; root:xnu-7195.121.3~9/RELEASE_X86_64 x86_64
-➜  metric-apis git:(main) ✗ 
+
+➜  ~ bash --version
+GNU bash, version 3.2.57(1)-release (x86_64-apple-darwin20)
+Copyright (C) 2007 Free Software Foundation, Inc.
+➜  ~ 
 
 ````
 ###### Logs on terminal 
