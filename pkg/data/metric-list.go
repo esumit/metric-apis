@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-var mutex sync.Mutex
 
 type listMetric struct {
 	sync.Mutex
@@ -52,8 +51,8 @@ func (l *listMetric) SaveMetricData(ctx context.Context, data MetricData, second
 }
 
 func (l *listMetric) GetMetricSumByKey(ctx context.Context, key string, seconds int) (*MetricRs, error) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	
 	var sum int16
 	var count int16
@@ -70,8 +69,6 @@ func (l *listMetric) GetMetricSumByKey(ctx context.Context, key string, seconds 
 		if v.Key == key && v.CreatedAt.Before(EndTime) && v.CreatedAt.After(StartTime) {
 			sum = sum + v.Value
 			count = count + 1
-		} else {
-			l.lm.Remove(e)
 		}
 	}
 	
