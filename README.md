@@ -1,6 +1,6 @@
 #### Metric APIs
-A conceptual metric logging and reporting service that sums metrics by time window for 
-the most recent collection time.  
+MetricAPIs is a conceptual logging and reporting service that aggregates metrics by time window based on the most recent collection period. 
+This service offers two key metric endpoints: posting metric data for a specified metric key and retrieving the sum of metric values for a specified metric key.
 
 #### Demo Recording
 
@@ -8,19 +8,15 @@ https://tinyurl.com/metric-apis
 
 #### How conceptually it works ?
 
+![Screenshot Request: metric list for posting and retrieving metric data - active_visitors ](/images/metric-apis-flow.png)
+
 This  metric apis service have implementation of two metric endpoints:
 
 ###### 1. post metric data for a metric key e.g. active_visitors
-
-On post request, it post an integer metric value for a specified metric key e.g. active_visitors.
-It prepare a data model as metric data (CreatedAt, Key, Value), provide it an Id and store 
-in metric list data structure. 
-
-On every insert, it traverse list's elements and check each element's CreatedAt time should be 
-in between current_time and (current_time - COLLECTION_TIMEOUT), means most recent
-COLLECTION_TIMEOUT as time window. 
-
-If list's elements CreatedAt time not matches to time window then remove it from the list. 
+When a POST request is made, the service stores an integer metric value for a specified metric key (e.g., active_visitors) 
+as a data model (CreatedAt, Key, Value), assigns it an ID, and saves it to a metric list data structure. 
+During every insertion, the service checks if each element's CreatedAt time falls within the current time 
+and the most recent COLLECTION_TIMEOUT window. If not, the element is removed from the list. 
 
 on success, it returns the id of created metric-data in the list. 
 
@@ -31,25 +27,19 @@ Response:
     "value": 20
 }
 ````
-It uses sync.mutex and apply lock on every insert and unlock it after.
+The service uses a sync.mutex to lock and unlock during each insertion.
 
 ![Screenshot Request: post metric data for key - active_visitors ](/images/Metric-POST-ByKey-2021-07-15.png)
 
 
-###### 2. get metric data for a metric key e.g. active_visitors
+###### 2. Retrieving metric data for a metric key e.g. active_visitors
 
-On get request, its get sum of metric values for a specified metric key e.g. active_visitors, and 
-that is based on the configured time window.
+When a GET request is made, the service calculates the sum of metric values for a specified metric key (e.g., active_visitors) 
+within the configured time window. 
 
-On every get, it checks the configured COLLECTION_TIMEOUT value as time window. It traverse
-all list's elements, and check each element's CreatedAt time should be in between current_time 
-and (current_time - COLLECTION_TIMEOUT), means most recent COLLECTION_TIMEOUT time window.
-
-It picks the list elements which matches to the time window, it then calculate sum of its metric data Values, count of metrics,
-collection start time, collection end time and return as json.
-If list's elements CreatedAt time not matches to time window then remove it from the list. 
-
-It uses sync.mutex and apply lock on every get and unlock it after.
+It traverses the list's elements, checking if each element's CreatedAt time falls within the most recent COLLECTION_TIMEOUT window. 
+If it does, the service calculates the sum of the metric data values, count of metrics, collection start time, and collection end time, and returns the data as JSON. 
+The service uses a sync.mutex to lock and unlock during each retrieval.
 
 ````
 Request : get metric data for key - active_visitors
@@ -68,6 +58,7 @@ Refer start_time and end_time :
 - On this example its 200 seconds 
 
 ````
+With its ability to log and report metric data efficiently, MetricAPIs provides a streamlined approach for tracking and analyzing key performance indicators in real-time.
 ![Screenshot Request: get metric data for key - active_visitors ](/images/Metric-GET-ByKey-2021-07-15.png)
 
 

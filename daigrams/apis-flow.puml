@@ -1,0 +1,23 @@
+@startuml
+participant Client
+participant Server
+participant MetricList
+
+Client -> Server: Post metric data (key, value)
+activate Server
+Server -> MetricList: Store metric (key, value)
+activate MetricList
+MetricList --> Server: Acknowledge storage
+deactivate MetricList
+Server --> Client: Return created metric-data ID
+deactivate Server
+
+Client -> Server: Get metric data (key)
+activate Server
+Server -> MetricList: Retrieve metrics within time window (key)
+activate MetricList
+MetricList --> Server: Return matching metrics
+deactivate MetricList
+Server --> Client: Return aggregated metric data (sum, count, start_time, end_time)
+deactivate Server
+@enduml
