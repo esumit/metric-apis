@@ -26,7 +26,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o metric-apis .
 
 
 # Start fresh from a smaller image
-FROM alpine:3.9 
+FROM alpine:3.19 
 RUN apk add ca-certificates
 
 WORKDIR /root/
